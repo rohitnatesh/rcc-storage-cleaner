@@ -41,6 +41,34 @@ def get_storage_information(args):
     return storage_information
 
 
+def iterate_and_delete(
+    paths, root, time_attribute, delete_older_than, dry_run, is_directory=False
+):
+    directories_to_delete = []
+
+    for path in paths:
+        full_path = os.path.join(root, path)
+        file_stat = os.stat(full_path)
+        current_time_attr = getattr(file_stat, time_mapping[time_attribute])
+        file_age_days = (
+            datetime.datetime.now() - datetime.datetime.fromtimestamp(current_time_attr)
+        ).days
+
+        if file_age_days >= delete_older_than:
+            if is_directory:
+                directories_to_delete.append(full_path)
+            else:
+                print(f"Deleting: {full_path}")
+
+                if not dry_run:
+                    try:
+                        os.remove(full_path)
+                    except Exception as e:
+                        print(e, file=sys.stderr)
+
+    return directories_to_delete if is_directory else None
+
+
 def main(args):
     dry_run = args.dry_run
     directory_path = args.directory_path
@@ -53,7 +81,25 @@ def main(args):
 
     before_clean = get_storage_information(args)
 
-    # TODO: File search and deletion logic.
+    directories_to_delete = []
+
+    for root, directories, files in os.walk(directory_path):
+        iterate_and_delete(files, root, time_attribute, delete_older_than, dry_run)
+
+        if directories:
+            new_directories_to_delete = iterate_and_delete(
+                directories, root, time_attribute, delete_older_than, dry_run, True
+            )
+            directories_to_delete.extend(new_directories_to_delete)
+
+    for directory in directories_to_delete:
+        print(f"Deleting: {directory}")
+
+        if not dry_run:
+            try:
+                os.rmdir(directory)
+            except Exception as e:
+                print(e, file=sys.stderr)
 
     after_clean = get_storage_information(args)
 
