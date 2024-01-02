@@ -9,15 +9,13 @@ time_mapping = {"access": "st_atime", "change": "st_ctime", "modified": "st_mtim
 
 
 def get_storage_information(args):
-    (
-        directory_path,
-        storage_ssh_host,
-        storage_quota_command,
-        storage_block_size,
-        storage_fileset,
-        storage_post_process,
-        storage_custom_command,
-    ) = args
+    directory_path = args.directory_path
+    storage_ssh_host = args.storage_ssh_host
+    storage_quota_command = args.storage_quota_command
+    storage_block_size = args.storage_block_size
+    storage_fileset = args.storage_fileset
+    storage_post_process = args.storage_post_process
+    storage_custom_command = args.storage_custom_command
 
     if storage_custom_command:
         command = storage_custom_command
@@ -44,12 +42,10 @@ def get_storage_information(args):
 
 
 def main(args):
-    (
-        is_dry_run,
-        directory_path,
-        delete_older_than,
-        time_attribute,
-    ) = args
+    dry_run = args.dry_run
+    directory_path = args.directory_path
+    delete_older_than = args.delete_older_than
+    time_attribute = args.time_attribute
 
     print(
         f"{datetime.datetime.now()} - start: will clean out data older than {delete_older_than} days in {directory_path}"
@@ -132,9 +128,8 @@ if __name__ == "__main__":
         help="Post-processing steps after storage information is collected. When the custom storage command is provided, none of the other storage arguments will be used.",
     )
 
-    args = parser.parse_args()
-
     try:
+        args = parser.parse_args()
         main(args)
     except Exception as e:
         print(e, file=sys.stderr)
