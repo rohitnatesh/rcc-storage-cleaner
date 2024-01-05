@@ -156,7 +156,7 @@ if __name__ == "__main__":
         help="The unit in which the number of storage blocks is displayed. Is not used when custom storage command is provided.",
     )
     parser.add_argument(
-        "--storage-fileset",
+        "--storage-volume",
         "-j",
         type=str,
         help="The storage fileset to use. By default, it is derived from the deletion directory information. Is not used when custom storage command is provided.",
